@@ -7,15 +7,6 @@
 <body>
 
 
-    <div class="clock">
-      <div class="clock-face">
-        <div class="hand hour-hand"></div>
-        <div class="hand min-hand"></div>
-        <div class="hand second-hand"></div>
-      </div>
-    </div>
-
-
   <style>
     html {
       background:#018DED url(http://unsplash.it/1500/1000?image=881&blur=50);
@@ -52,22 +43,86 @@
       position: relative;
       width: 100%;
       height: 100%;
-      transform: translateY(-3px); /* account for the height of the clock hands */
+      transform: translateY(3px); /* account for the height of the clock hands */
     }
 
     .hand {
-      width:50%;
-      height:6px;
-      background:black;
+      width: 6px;
+      height: 50%;
+      background: black;
       position: absolute;
-      top:50%;
+      bottom: 50%;
+      left: 50%;
+      transform-origin: center bottom;
+      /* Setting a smooth animation causes the seconds hand to flip */
+      /* counter-clockwise from 360 to 0. */
+      /* transition: transform 1s linear 0s; */
+    }
+
+    .hour-hand {
+      height: 20%;
+    }
+
+    .min-hand {
+    }
+
+    .seconds-hand {
+      background: red;
+      width: 3px;
     }
 
   </style>
 
+  <div class="clock">
+    <div class="clock-face">
+      <div class="hand hour-hand"></div>
+      <div class="hand min-hand"></div>
+      <div class="hand seconds-hand"></div>
+    </div>
+  </div>
+
+
   <script>
+    var SECONDS_IN_A_MINUTE = 60;
+    var SECONDS_IN_AN_HOUR = 3600;
+    var SECONDS_IN_A_DAY = 86400;
 
+    function getSecondsSinceMidnight(now) {
+      return now.getSeconds() + (60 * now.getMinutes()) + (60 * 60 * now.getHours());
+    }
 
+    function toSecondsDegrees(now) {
+      var partial = getSecondsSinceMidnight(now) % SECONDS_IN_A_MINUTE;
+      var percentage = partial / SECONDS_IN_A_MINUTE;
+      return percentage * 360;
+    }
+
+    function toMinuteDegrees(now) {
+      var partial = getSecondsSinceMidnight(now) % SECONDS_IN_AN_HOUR;
+      var percentage = partial / SECONDS_IN_AN_HOUR;
+      return percentage * 360;
+    }
+
+    function toHourDegrees(now) {
+      var partial = getSecondsSinceMidnight(now) % SECONDS_IN_A_DAY;
+      var percentage = partial / SECONDS_IN_A_DAY;
+      return percentage * 360;
+    }
+
+    var hour = document.querySelector('.hour-hand');
+    var minute = document.querySelector('.min-hand');
+    var seconds = document.querySelector('.seconds-hand');
+
+    function renderClock() {
+      requestAnimationFrame(renderClock);
+
+      var now = new Date();
+      hour.style.transform = 'rotate(' + toHourDegrees(now) + 'deg)';
+      minute.style.transform = 'rotate(' + toMinuteDegrees(now) + 'deg)';
+      seconds.style.transform = 'rotate(' + toSecondsDegrees(now) + 'deg)';
+    }
+
+    renderClock();
   </script>
 </body>
 </html>
