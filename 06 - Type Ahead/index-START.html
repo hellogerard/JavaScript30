@@ -4,19 +4,107 @@
   <meta charset="UTF-8">
   <title>Type Ahead 👀</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .status {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .search-form {
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
+
+  <div class="status">Loading...</div>
   <form class="search-form">
     <input type="text" class="search" placeholder="City or State">
     <ul class="suggestions">
-      <li>Filter for a city</li>
-      <li>or a state</li>
     </ul>
   </form>
-<script>
-const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
 
-</script>
+  <script>
+    let data = [];
+    const status = document.querySelector('.status');
+    const form = document.querySelector('.search-form');
+    const query = document.querySelector('.search-form .search');
+    const resultsList = document.querySelector('.search-form .suggestions');
+
+    function search(e) {
+      const value = query.value;
+      if (!value) {
+        return resetResults();
+      }
+      const regex = new RegExp(value, 'gi');
+      const results = data.filter((city) => (
+        regex.test(city.city) || regex.test(city.state)
+      ));
+      renderResults(regex, results);
+    }
+
+    function resetResults() {
+      resultsList.innerHTML = '<li>Filter for a city</li><li>or a state</li>';
+    }
+
+    function renderResults(regex, results) {
+      resultsList.innerHTML = '';
+
+      results.forEach((result) => {
+        const li = renderResult(regex, result);
+        resultsList.appendChild(li);
+      });
+    }
+
+    function renderResult(regex, result) {
+      const li = document.createElement('li');
+      const city = document.createElement('span');
+      const population = document.createElement('span');
+
+      city.innerHTML = decorate(regex, result);
+      population.innerHTML = parseInt(result.population, 10).toLocaleString();
+      li.appendChild(city);
+      li.appendChild(population);
+      return li;
+    }
+
+    function decorate(regex, result) {
+      const city = result.city.replace(regex, '<span class="hl">$&</span>');
+      const state = result.state.replace(regex, '<span class="hl">$&</span>');
+
+      return `${city}, ${state}`;
+    }
+
+    function load() {
+      const ENDPOINT = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+      const xhr = new XMLHttpRequest();
+
+      xhr.addEventListener('load', (e) => {
+        if (e.currentTarget.status === 200) {
+          data = JSON.parse(e.currentTarget.responseText);
+          status.style.display = 'none';
+          form.style.display = 'block';
+          query.focus();
+          query.addEventListener('keyup', search);
+        } else {
+          status.style.display = 'flex';
+          status.innerHTML = 'There was an error.';
+        }
+      });
+
+      xhr.open('GET', ENDPOINT);
+      xhr.send();
+    }
+
+    resetResults();
+    load();
+  </script>
+
   </body>
 </html>
