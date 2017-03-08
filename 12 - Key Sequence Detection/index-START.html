@@ -7,6 +7,41 @@
 </head>
 <body>
 <script>
+  const sequence = [];
+  const code = [
+    'ArrowUp',
+    'ArrowUp',
+    'ArrowDown',
+    'ArrowDown',
+    'ArrowLeft',
+    'ArrowRight',
+    'ArrowLeft',
+    'ArrowRight',
+    'b',
+    'a',
+    'b',
+    'a',
+  ];
+
+  Array.prototype.equals = function(arr) {
+    if (!arr) return false;
+    if (this.length !== arr.length) return false;
+
+    return this.reduce((result, key, i) => {
+      return result && key === arr[i];
+    }, true);
+  };
+
+  document.addEventListener('keyup', (e) => {
+    sequence.push(e.key);
+    if (sequence.length > code.length) {
+      sequence.shift();
+    }
+    if (sequence.equals(code)) {
+      cornify_add();
+    }
+    console.log(sequence);
+  });
 </script>
 </body>
 </html>
