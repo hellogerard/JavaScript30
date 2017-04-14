@@ -28,7 +28,67 @@
 <script>
   const addItems = document.querySelector('.add-items');
   const itemsList = document.querySelector('.plates');
-  const items = [];
+  const items = JSON.parse(localStorage.getItem('items'));
+
+  function renderItems() {
+    const els = items.map((item, i) => {
+      const done = item.done ? 'checked' : '';
+      return `
+        <li>
+          <input type="checkbox" ${done} id="${i}">
+            <label for="${i}">${item.text}</label>
+          </input>
+          <span data-id="${i}" class="delete">&times;</span>
+        </li>
+      `;
+    });
+
+    itemsList.innerHTML = els.join('');
+  }
+
+  function toggleItem(input) {
+    const i = parseInt(input.getAttribute('id'), 10);
+    const clicked = items[i];
+    clicked.done = !clicked.done;
+    localStorage.setItem('items', JSON.stringify(items));
+  }
+
+  function deleteItem(span) {
+    const i = parseInt(span.dataset.id, 10);
+    items.splice(i, 1);
+    localStorage.setItem('items', JSON.stringify(items));
+  }
+
+  function addItem(input) {
+    const text = input.value;
+    const itemObj = { text, done: false };
+    items.push(itemObj);
+    localStorage.setItem('items', JSON.stringify(items));
+  }
+
+  itemsList.addEventListener('change', (e) => {
+    if (e.target && e.target.matches('[type=checkbox]')) {
+      toggleItem(e.target);
+      renderItems();
+    }
+  });
+
+  itemsList.addEventListener('click', (e) => {
+    if (e.target && e.target.matches('.delete')) {
+      deleteItem(e.target);
+      renderItems();
+    }
+  });
+
+  addItems.addEventListener('submit', (e) => {
+    const input = e.currentTarget.querySelector('[name=item]');
+    addItem(input);
+    renderItems();
+    input.value = '';
+    e.preventDefault();
+  });
+
+  renderItems();
 
 </script>
 
