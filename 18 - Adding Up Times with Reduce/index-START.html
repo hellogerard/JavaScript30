@@ -182,6 +182,21 @@
     </li>
   </ul>
 <script>
+  const items = Array.from(document.querySelectorAll('.videos li'));
+  const totalSeconds = items
+    .map((item) => {
+      const duration = item.dataset.time;
+      const [ minutes, seconds ] = duration.split(':').map(parseFloat);
+      return (60 * minutes) + seconds;
+    })
+    .reduce((seconds, cur) => {
+      return cur + seconds;
+    }, 0);
+  const hours = Math.floor(totalSeconds / 60 / 60);
+  const minutesLeft = Math.floor((totalSeconds - (hours * 60 * 60)) / 60);
+  const secondsLeft = totalSeconds - (hours * 60 * 60) - (minutesLeft * 60);
+  // console.log(totalSeconds);
+  console.log(`${hours}:${minutesLeft}:${secondsLeft}`);
 </script>
 </body>
 </html>
